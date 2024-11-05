@@ -1,77 +1,50 @@
-# mrFAST
+# GRIM-Filter 
 
-## micro-read Fast Alignment Search Tool
+GRIM-Filter is an algorithm optimized to exploit 3D-stacked memory systems that integrate computation within a logic layer stacked under memory layers, to perform processing-in-memory (PIM). GRIM-Filter quickly filters seed locations by 1) introducing a new representation of coarse-grained segments of the reference genome, and 2) using massively-parallel in-memory operations to identify read presence within each coarse-grained segment.
 
-mrFAST is a read mapper that is designed to map short reads to reference genome with a special emphasis on the discovery of structural variation and segmental duplications. mrFAST maps short reads with respect to user defined error threshold, including indels up to 4+4 bp. This manual, describes how to choose the parameters and tune mrFAST with respect to the library settings. mrFAST is designed to find 'all'  mappings for a given set of reads, however it can return one "best" map location if the relevant parameter is invoked.
+Our code baseline is taken from [mrFAST_v2.6.1.0](http://mrfast.sourceforge.net/), which is described in detail in the following publications:
+* [C. Alkan et al., Personalized copy number and segmental duplication maps using next-generation sequencing, Nature Genetics](https://www.ncbi.nlm.nih.gov/pubmed/19718026) 
+* [H. Xin, Accelerating read mapping with FastHASH, BMC Genomics](https://www.ncbi.nlm.nih.gov/pubmed/23369189)
 
-**NOTE:** mrFAST is developed for Illumina, thus requires all reads to be at the same length. For paired-end reads, lengths of mates may be different from each other, but each "side" should have a uniform length.
+While we use mrFAST as a baseline, GRIM-Filter can be adapted to run with any other read mapper. 
 
-**Please refer to the** [wiki](https://github.com/BilkentCompGen/mrfast/wiki) **for details on how to build and use mrFAST**.
+The algorithm of GRIM-Filter is described at: [J.S. Kim et al., GRIM-Filter: Fast Seed Location Filtering in DNA Read Mapping using Processing-in-Memory Technologies, To appear in BMC Genomics](https://arxiv.org/pdf/1711.01177.pdf)
 
-mrFAST : Micro-Read Fast Alignment Search Tool. Enhanced with FastHASH.
+## Prerequisites 
 
-# Fetching and building mrFAST
+In order to run GRIM-Filter, have the following files: 
+* Human Genome FASTA file (e.g., [Human_g1k_v37 Genome](ftp://ftp.ncbi.nlm.nih.gov/1000genomes/ftp/technical/.../human_g1k_v37.fasta.gz))
+* Read Sequence data sets (FASTA file) 
 
-Pretty simple. To fetch:
+## Getting Started
 
-	git clone https://github.com/BilkentCompGen/mrfast.git
+To build mrFAST with GRIM-Filter, simply do: 
 
-To build:
+```
+$ make 
+```
 
-	cd mrfast
-	make
+To build the hash table used by mrFAST, run the following command:
+```
+./mrfast --index <Genome FASTA File>
+```
+There is more information on the parameters for hash table generation in the [mrFAST User Manual](refgen.fasta).
 
-# Usage:
+To build the bitvectors that are referenced by GRIM-Filter, run the following
+command: 
+```
+./mrfast --index <Genome FASTA File> -t 0 -k <Number of Bins> -b <Token Size> -f <Number of Tokens the Bitvector can Count (1)>
+```
 
-	mrfast [options]
+This will generate a <Genome FASTA Filename>.bv file in the same directory as
+your Genome FASTA File. 
 
-## General Options:  
-	-v|--version    Current Version.  
-	-h    Shows the help file.  
+You can then use the bitvectors by running mrfast with the following command: 
+```
+./mrfast --search <Genome FASTA File> -b <Token Size> -t 1 -e <error Tolerance (%)> -k <Number of Bins> -q 1 --seq <Read Sequences FASTA File>
+```
 
+## Contributors 
 
-## Indexing Options:
-	--index [file]    Generate an index from the specified fasta file.   
-	--ws [int]    Set window size for indexing (default:12 max:14).  
-
-
-## Searching Options:
-	--search [file]    Search in the specified genome. Provide the path to the fasta file. Index file should be in the same directory.  
-	--pe    Search will be done in Paired-End mode.  
-	--seq [file]    Input sequences in fasta/fastq format [file]. If paired end reads are interleaved, use this option.  
-	--seq1 [file]    Input sequences in fasta/fastq format [file] (First file). Use this option to indicate the first file of paired end reads.   
-	--seq2 [file]    Input sequences in fasta/fastq format [file] (Second file). Use this option to indicate the second file of paired end reads.    
-	-o [file]    Output of the mapped sequences. The default is "output".  
-	-u [file]    Save unmapped sequences in fasta/fastq format.  
-	--best    Only the best mapping from all the possible mapping is returned.  
-	--seqcomp    Indicates that the input sequences are compressed (gz).  
-	--outcomp    Indicates that output file should be compressed (gz).  
-	-e [int]    Maximum allowed edit distance (default 4% of the read length).  
-	--min [int]    Min distance allowed between a pair of end sequences.  
-	--max [int]    Max distance allowed between a pair of end sequences.  
-	--maxoea [int]    Max number of One End Anchored (OEA) returned for each read pair. We recommend 100 or above for NovelSeq use. Default = 100.	
-	--maxdis [int]    Max number of discordant map locations returned for each read pair. We recommend 300 or above for VariationHunter use. Default = 300.  
-	--crop [int]    Trim the reads to the given length.  
-	--sample [string]    Sample name to be added to the SAM header (optional).  
-	--rg [string]    Read group ID to be added to the SAM header (optional).  
-	--lib [string]    Library name to be added to the SAM header (optional).  
-
-
-## Running mrFAST via Docker
-
-To build a Docker image:
-
-	cd docker
-	docker build . -t mrfast:latest
-
-Your image named "mrfast" should be ready. You can run tardis using this image by
-
-	docker run --user=$UID -v /path/to/inputs:/input -v /path/to/outputdir:/output mrfast [args]
-- ```[args]``` are usual arguments you would pass to tardis executable. Be careful about mapping. You need to specify folders respective to container directory structure.
-- You need to map host machine input and output directory to responding volume directories inside the container. These options are specified by '-v' argument.
-- Docker works with root user by default. "--user" option saves your outputs.
-
-Sample Docker-based command line assuming the working directory is /home/mrfast/samplerun:
-
-	docker run --user=$UID -v /home/mrfast/samplerun/:/input -v /home/mrfast/samplerun:/output mrfast --search /input/human_g1k_v37.fasta --seq1 /input/f1.fastq --seq2 /input/f2.fastq --pe --min 0 --max 1000 -o /output/test.sam
+* **Jeremie S. Kim** (Carnegie Mellon University) 
 

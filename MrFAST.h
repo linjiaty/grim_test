@@ -116,6 +116,18 @@ extern long long			verificationCnt;
 extern long long			mappingCnt;
 extern long long			mappedSeqCnt;
 extern long long			completedSeqCnt;
+extern long long            vseedeCnt;
+extern long long            full_vseedeCnt;
+extern long long            skipCnt;
+extern long long            skip_same_bin_skip; 
+extern long long            bv_skipCnt;
+extern long long            DP_fail;
+extern long long            error3_fail;
+extern long long            error2_fail;
+extern long long            error3_2_fail;
+extern long long            total_seed_locs;
+extern long long            total_seqs;
+extern double               VSEEDE_timer;
 
 void initFAST(Read *, int, int *, int, char *);
 
@@ -170,6 +182,9 @@ int verifySingleEndEditDistance4(int refIndex, char *lSeq, int lSeqLength, char 
 
 int verifySingleEndEditDistanceExtension(int refIndex, char *lSeq, int lSeqLength, char *rSeq, int rSeqLength, int segLength,
 					 char *matrix, int *map_location);
+
+double return_total_bv_skip_time();
+double return_total_AF_CKS_runtime();
 
 // for fastHASH 
 int compareEntrySize (const void *a, const void *b);											// fastHASH()

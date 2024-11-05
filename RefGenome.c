@@ -29,18 +29,18 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  Authors: 
-  Farhad Hormozdiari
-	  farhadh AT uw DOT edu
-  Faraz Hach
-	  fhach AT cs DOT sfu DOT ca
-  Can Alkan
-	  calkan AT gmail DOT com
-  Hongyi Xin
-	  gohongyi AT gmail DOT com
-  Donghyuk Lee
-	  bleups AT gmail DOT com
-*/
+Authors: 
+Farhad Hormozdiari
+farhadh AT uw DOT edu
+Faraz Hach
+fhach AT cs DOT sfu DOT ca
+Can Alkan
+calkan AT gmail DOT com
+Hongyi Xin
+gohongyi AT gmail DOT com
+Donghyuk Lee
+bleups AT gmail DOT com
+ */
 
 
 #include <stdio.h>
@@ -59,116 +59,116 @@ int _rg_contGen;
 /**********************************************/
 int initLoadingRefGenome(char *fileName)
 {
-  char ch;
-  _rg_fp = fileOpen (fileName, "r");
-  if (fscanf(_rg_fp, "%c", &ch))
+    char ch;
+    _rg_fp = fileOpen (fileName, "r");
+    if (fscanf(_rg_fp, "%c", &ch))
     {
-      if (ch == '>')
-	{
-	  _rg_contGen = 0;
-	  _rg_offset = 0;
-	  _rg_gen = getMem(CONTIG_MAX_SIZE);
-	  _rg_name = getMem(CONTIG_NAME_SIZE);
-	  return 1;
-	}
+        if (ch == '>')
+        {
+            _rg_contGen = 0;
+            _rg_offset = 0;
+            _rg_gen = getMem(CONTIG_MAX_SIZE);
+            _rg_name = getMem(CONTIG_NAME_SIZE);
+            return 1;
+        }
     }
-  return 0;
+    return 0;
 }
 /**********************************************/
 void finalizeLoadingRefGenome()
 {
-  freeMem(_rg_gen, CONTIG_MAX_SIZE);
-  freeMem(_rg_name, CONTIG_NAME_SIZE); 
-  fclose(_rg_fp);
+    freeMem(_rg_gen, CONTIG_MAX_SIZE);
+    freeMem(_rg_name, CONTIG_NAME_SIZE); 
+    fclose(_rg_fp);
 }
 /**********************************************/
 int loadRefGenome(char **refGen, char **refGenName, int *refGenOff)
 {
-  char ch;
-  int i;
-  int returnVal = 0;
-  int actualSize=0;
-  int size;
-  char *tmp;
-	
-  // New Contig 
-  if (!_rg_contGen)
-    {
-      size = 0;
-      tmp = fgets(_rg_name, SEQ_MAX_LENGTH, _rg_fp);
+    char ch;
+    int i;
+    int returnVal = 0;
+    int actualSize=0;
+    int size;
+    char *tmp;
 
-      if (tmp==NULL)
-	fprintf(stderr, "Error reading the contig.\n");
-      
-      int k;
-      for (k=0; k<strlen(_rg_name);k++)
-	{
-	  if (_rg_name[k] == ' ')
-	    {
-	      _rg_name[k]='\0';
-	      break;
-	    }
-	}
-    }
-  else
+    // New Contig 
+    if (!_rg_contGen)
     {
-      size=strlen(_rg_gen);
-      for( i = 0 ; i < CONTIG_OVERLAP ; i++ )
-	{
-			
-	  _rg_gen[i] = _rg_gen[size-CONTIG_OVERLAP+i];
-	  if (_rg_gen[i] != 'N')
-	    actualSize++;
-	}
-      size = CONTIG_OVERLAP;
+        size = 0;
+        tmp = fgets(_rg_name, SEQ_MAX_LENGTH, _rg_fp);
+
+        if (tmp==NULL)
+            fprintf(stderr, "Error reading the contig.\n");
+
+        int k;
+        for (k=0; k<strlen(_rg_name);k++)
+        {
+            if (_rg_name[k] == ' ')
+            {
+                _rg_name[k]='\0';
+                break;
+            }
+        }
     }
-  while( fscanf(_rg_fp, "%c", &ch) > 0 )
+    else
     {
-      if (ch == '>')
-	{
-	  _rg_contGen = 0;
-	  returnVal = 1;
-	  break;
-	}
-      else if (!isspace(ch))
-	{
-	  ch = toupper(ch);
-	  _rg_gen[size++] = ch;
-	  if (ch != 'N')
-	    {
-	      actualSize++;
-	    }
-	  if (actualSize == CONTIG_SIZE || size == CONTIG_MAX_SIZE)
-	    {
-	      _rg_contGen = 1;
-	      returnVal=1;
-	      break;
-	    }
-	}
+        size=strlen(_rg_gen);
+        for( i = 0 ; i < CONTIG_OVERLAP ; i++ )
+        {
+
+            _rg_gen[i] = _rg_gen[size-CONTIG_OVERLAP+i];
+            if (_rg_gen[i] != 'N')
+                actualSize++;
+        }
+        size = CONTIG_OVERLAP;
+    }
+    while( fscanf(_rg_fp, "%c", &ch) > 0 )
+    {
+        if (ch == '>')
+        {
+            _rg_contGen = 0;
+            returnVal = 1;
+            break;
+        }
+        else if (!isspace(ch))
+        {
+            ch = toupper(ch);
+            _rg_gen[size++] = ch;
+            if (ch != 'N')
+            {
+                actualSize++;
+            }
+            if (actualSize == CONTIG_SIZE || size == CONTIG_MAX_SIZE)
+            {
+                _rg_contGen = 1;
+                returnVal=1;
+                break;
+            }
+        }
 
     }
 
-  _rg_gen[size] = '\0';
+    _rg_gen[size] = '\0';
 
-  for (i=strlen(_rg_name)-1; i >= 0; i--)
-    if (!isspace(_rg_name[i]))
-      break;
-  _rg_name[i+1] = '\0';
+    for (i=strlen(_rg_name)-1; i >= 0; i--)
+        if (!isspace(_rg_name[i]))
+            break;
+    _rg_name[i+1] = '\0';
 
-  *refGenOff = _rg_offset;
-  *refGenName = _rg_name;
-  *refGen = _rg_gen;
-  
-  if (_rg_contGen == 1)
+    *refGenOff = _rg_offset;
+    *refGenName = _rg_name;
+    *refGen = _rg_gen;
+
+    if (_rg_contGen == 1)
     {
-      _rg_offset += size-CONTIG_OVERLAP;
+        _rg_offset += size-CONTIG_OVERLAP;
     }
-  else
+    else
     {
-      _rg_offset = 0;
+        _rg_offset = 0;
     }
-	
-	
-  return returnVal;
+
+
+    return returnVal;
 }
 /**********************************************/

@@ -63,16 +63,25 @@ extern unsigned int		CONTIG_MAX_SIZE;
 
 extern unsigned char	WINDOW_SIZE;		// WINDOW SIZE for indexing/searching
 extern unsigned short	SEQ_LENGTH;		// Sequence(read) length
-
+// the size of subsequences we use to create bitvectors
+extern unsigned char    BV_TOKEN_SIZE; 
+extern unsigned int     BV_NUM_BINS; 
+extern unsigned char    PIM_MODE;
+extern unsigned int     BV_BIN_SIZE;
+extern unsigned int     BV_EFF_BIN_SIZE; 
+extern unsigned int     BV_MULTIPLICITY; 
+extern unsigned int     BV_COALESCING;
 extern char				*versionNumber;
 extern char				*versionNumberF;
 extern unsigned char	mrFAST;
-
 
 extern int				maxOEAOutput;
 extern int				maxDiscordantOutput;
 extern int				uniqueMode;
 extern int				indexingMode;
+extern int              bvMode;
+extern int              PRINT_READSEQ_RUNTIMES;
+extern long long        fbv_index;
 extern int				searchingMode;
 extern int				pairedEndModeMP;
 extern int				pairedEndModePE;
@@ -99,11 +108,12 @@ extern char             libName[FILE_NAME_LENGTH];
 extern unsigned char	seqFastq;
 extern unsigned char	errThreshold;
 extern unsigned char	maxHits;	
+extern long long        total_bitvectorsSize;
 extern int				minPairEndedDiscordantDistance;
 extern int				maxPairEndedDiscordantDistance;
 extern int				minPairEndedDistance;
 extern int				maxPairEndedDistance;
-extern char				fileName[2][FILE_NAME_LENGTH];
+extern char				fileName[5][FILE_NAME_LENGTH];
 extern int				fileCnt;
 extern long long		memUsage;
 

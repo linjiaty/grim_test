@@ -57,6 +57,7 @@ long long		       	memUsage = 0;
 FILE *fileOpen(char *fileName, char *mode)
 {
   FILE *fp;
+  printf("%s\n", fileName);
   fp = fopen (fileName, mode);
   if (fp == NULL)
     {
@@ -129,6 +130,7 @@ void * getMem(size_t size)
     fprintf(stderr, "Cannot allocate memory. Currently addressed memory = %0.2f MB, requested memory = %0.2f MB.\nCheck the available main memory, and if you have user limits (ulimit -v).\n", getMemUsage(), (float)(size/1048576.0));
     exit(0);
   }
+  //printf("getMem: %p (%zu)\n", ret, size);
   memUsage+=size;
   return ret;
 }
@@ -147,6 +149,7 @@ void freeMem(void *ptr, size_t size)
 {
   memUsage-=size;
   free(ptr);
+  ptr = NULL;
 }
 /**********************************************/
 double getMemUsage()
